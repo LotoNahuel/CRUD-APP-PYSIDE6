@@ -1,0 +1,302 @@
+import sqlite3
+
+def get_connection():
+    try:
+        connection = sqlite3.connect("../db/database.db")
+        connection.execute("PRAGMA foreign_keys = ON")
+        if connection:
+            return connection
+    except Exception as e:
+        print(f"Error al conectar con la base de datos.\nERROR: {e}")
+
+### COMMIT USER ###
+def create_user(data):
+    with get_connection() as connection:
+        cursor = connection.cursor()
+        try:
+            cursor.execute('''
+                INSERT INTO user (first_name, second_name, last_name, birthdate, phone, email, password, create_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            ''', (data["first_name"], data["second_name"], data["last_name"], data["birthdate"], data["phone"], data["email"], data["password"], data["create_at"]))
+            connection.commit()
+            return True
+        except sqlite3.IntegrityError as e:
+            print(f"Database error: {e}")
+            return False
+        finally:
+            cursor.close()
+
+def edit_password(data):
+    with get_connection() as connection:
+        cursor = connection.cursor()
+        try:
+            cursor.execute(
+                "UPDATE users SET password = ? WHERE email = ?",
+                    (data["password"], data["email"])
+            )
+            connection.commit()
+            return True
+        except sqlite3.IntegrityError as e:
+            print(f"Database error: {e}")
+            return False
+        finally:
+            cursor.close()
+
+def edit_email(data):
+    with get_connection() as connection:
+        cursor = connection.cursor()
+        try:
+            cursor.execute(
+                "UPDATE users SET email = ? WHERE userId = ?",
+                    (data["email"], data["userId"])
+            )
+            connection.commit()
+            return True
+        except sqlite3.IntegrityError as e:
+            print(F"Database error: {e}")
+            return False
+        finally:
+            cursor.close()
+
+def create_superUser(data):
+    with get_connection() as connection:
+        cursor = connection.cursor()
+        try:
+            cursor.execute('''
+                INSERT INTO superUser (idUser, create_at)
+                VALUES (?, ?)
+            ''', (data["userId"], data["create_at"]))
+            connection.commit()
+            return True
+        except sqlite3.IntegrityError as e:
+            print(f"Database Error: {e}")
+            return False
+        finally:
+            cursor.close()
+
+### COMMIT SUBJECT ###
+def create_subject(data):
+    with get_connection() as connection:
+        cursor = connection.cursor()
+        try:
+            cursor.execute('''
+                INSERT INTO subjects (name, grade, userId, create_at)
+                VALUES (?, ?, ?, ?)
+            ''', (data["name"], data["grade"], data["userId"], data["create_at"]))
+            connection.commit()
+            return True
+        except sqlite3.IntegrityError as e:
+            print(f"Database Error: {e}")
+            return False
+        finally:
+            cursor.close()
+
+def edit_subject(data):
+    with get_connection() as connection:
+        cursor = connection.cursor()
+        try:
+            cursor.execute(
+                "UPDATE subjects SET teacher = ? WHERE subjectId = ?",
+                    (data["userId"], data["subjectId"]))
+            connection.commit()
+            return True
+        except sqlite3.IntegrityError as e:
+            print(f"Database error: {e}")
+            return False
+        finally:
+            cursor.close()
+
+### COMMIT INSCRIPTIONS ###
+def student_inscription(data):
+    with get_connection() as connection:
+        cursor = connection.cursor()
+        try:
+            cursor.execute('''
+                INSERT INTO studentSubject (subjectId, userId, create_at)
+                VALUES (?, ?, ?)
+            ''', (data["subjectId"], data["userId"], data["create_at"]))
+            connection.commit()
+            return True
+        except sqlite3.IntegrityError as e:
+            print(f"Database error: {e}")
+            return False
+        finally:
+            cursor.close()
+
+### COMMIT SESSION ###
+def create_session(data):
+    with get_connection() as connection:
+        cursor = connection.cursor()
+        try:
+            cursor.execute('''
+                INSERT INTO session (userId, token_hashed, device_info, ip, create_at, expire_at)
+                VALUES (?, ?, ?, ?)
+            ''', (data["userId"], data["token"], data["device_info"], data["ip"], data["create_at"], data["expire_at"]))
+            connection.commit()
+            return True
+        except sqlite3.IntegrityError as e:
+            print(f"Database error: {e}")
+            return False
+        finally:
+            cursor.close()
+
+def del_session_DB(hashed_token):
+    with get_connection() as connection:
+        cursor = connection.cursor()
+        try:
+            cursor.execute("DELETE FROM sessions WHERE token_hash = ?",
+                        (hashed_token,))
+            connection.commit()
+            return True
+        except Exception as e:
+            print("Error al eliminar la Session: ", e)
+            return None
+        finally:
+            cursor.close()
+
+### GET DATA ###
+def user_login(data):
+    with get_connection() as connection:
+        cursor = connection.cursor()
+        try:
+            cursor.execute(
+                "SELECT password, userId FROM users WHERE email = ?",
+                    (data["email"])
+            )
+            userData = cursor.fetchone()
+            return userData, True
+        except sqlite3.IntegrityError as e:
+            print(f"Database error: {e}")
+            return False
+        finally:
+            cursor.close()
+            
+def session_id(data):
+    with get_connection() as connection:
+        cursor = connection.cursor()
+        try:
+            cursor.execute(
+                "SELECT userId FROM users WHERE email = ?",
+                    (data["email"])
+            )
+            userId = cursor.fetchone()
+            return userId, True
+        except sqlite3.IntegrityError as e:
+            print(f"Database error: {e}")
+            return False
+        finally:
+            cursor.close()
+
+def get_session(data):
+    with get_connection() as connection:
+        cursor = connection.cursor()
+        try:
+            cursor.execute(
+                "SELECT * FROM session WHERE userId = ?",
+                    (data["userId"],)
+            )
+            dataS = cursor.fetchone()
+            return dataS, True
+        except sqlite3.IntegrityError as e:
+            print(f"Database error: {e}")
+            return False
+        finally:
+            cursor.close()
+
+def get_user(data):
+    with get_connection() as connection:
+        cursor = connection.cursor()
+        try:
+            cursor.execute(
+                "SELECT * FROM users WHERE userId = ?",
+                    (data["userId"],)
+            )
+            dataU = cursor.fetchone()
+            return dataU, True
+        except sqlite3.IntegrityError as e:
+            print(f"Database error: {e}")
+            return False
+        finally:
+            cursor.close()
+
+def get_allSubjects():
+    with get_connection() as connection:
+        cursor = connection.cursor()
+        try:
+            cursor.execute(
+                "SELECT * FROM subjects"
+            )
+            rows = cursor.fetchall()
+            subjects = [dict(row) for row in rows]
+            return subjects, True
+        except sqlite3.IntegrityError as e:
+            print(f"Database error: {e}")
+            return False
+        finally:
+            cursor.close()
+
+def get_subject(data):
+    with get_connection() as connection:
+        cursor = connection.cursor()
+        try:
+            cursor.execute(
+                "SELECT * FROM subjects WHERE subjectId = ?",
+                    (data["subjectId"],)
+            )
+            dataS = cursor.fetchone()
+            return dataS, True
+        except sqlite3.IntegrityError as e:
+            print(f"Database error: {e}")
+            return False
+        finally:
+            cursor.close()
+
+def get_allStudSub():
+    with get_connection() as connection:
+        cursor = connection.cursor()
+        try:
+            cursor.execute(
+                "SELECT * FROM studentSubject"
+            )
+            rows = cursor.fetchall()
+            studentSubjects = [dict(row) for row in rows]
+            return studentSubjects, True
+        except sqlite3.IntegrityError as e:
+            print(f"Database Error: {e}")
+            return False
+        finally:
+            cursor.close()
+
+def get_withIdSubject(data):
+    with get_connection() as connection:
+        cursor = connection.cursor()
+        try:
+            cursor.execute(
+                "SELECT * FROM studentSubject WHERE subjectId = ?",
+                    (data["subjectId"],)
+            )
+            rows = cursor.fetchall()
+            studentSubjects = [dict(row) for row in rows]
+            return studentSubjects, True
+        except sqlite3.IntegrityError as e:
+            print(f"Database error: {e}")
+            return False
+        finally:
+            cursor.close()
+
+def get_withIdStudent(data):
+    with get_connection() as connection:
+        cursor = connection.cursor()
+        try:
+            cursor.execute(
+                "SELETCT * FROM studentSubject WHERE userId = ?",
+                    (data["userId"],)
+            )
+            rows = cursor.fetchall()
+            studentSubjects = [dict(row) for row in rows]
+            return studentSubjects, True
+        except sqlite3.IntegrityError as e:
+            print(f"Database error: {e}")
+            return False
+        finally:
+            cursor.close()
