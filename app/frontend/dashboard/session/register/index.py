@@ -1,5 +1,7 @@
 from PySide6 import QtCore, QtWidgets, QtGui
+from PySide6.QtWidgets import QMessageBox
 from .func import verify_data
+from ..login.index import Login
 
 class Register(QtWidgets.QWidget):
     def __init__(self):
@@ -42,7 +44,7 @@ class Register(QtWidgets.QWidget):
         self.form_layout.setVerticalSpacing(16)
         self.form_layout.setColumnStretch(1, 1)
 
-        labels = ["Username", "Name", "Last Name", "Date of Birth", "Email", "Password", "Confirm Password", "Type of User", "Phone Number"]
+        labels = ["First Name", "Second Name", "Last Name", "Birth Date", "Phone Number", "Email", "Password", "Confirm Password"]
 
         self.entries = []
         def magic(entry):
@@ -134,10 +136,26 @@ class Register(QtWidgets.QWidget):
 
     @QtCore.Slot()
     def magic(self):
-        if verify_data(self.entries) == True:
+        boolean, message = verify_data(self.entries)
+        if boolean == True:
             #   Se envia los datos a la DB, si es correcto se redirije al LOGIN    #
             #   Como no vamos a crear la DB todavia, verificamos que los datos son correctos-
             #   y redirigimos al LOGIN  #
-            return self.Login()
+            self._clear_layout(self.layout_primary)
+            return self.layout_primary.addWidget(Login(), alignment=QtCore.Qt.AlignCenter)
         else:
+            QMessageBox.information(self, "Información", message)
             self.message.setText("Complete todos los campos")
+
+    def _clear_layout(self, layout):
+        while layout.count():
+            item = layout.takeAt(0)
+            widget = item.widget()
+            child_layout = item.layout()
+
+            if widget is not None:
+                widget.setParent(None)
+                widget.deleteLater()
+            elif child_layout is not None:
+                self._clear_layout(child_layout)
+    

@@ -15,7 +15,7 @@ class app_init:
         super().__init__()
         self.app = None
         self.widget = None
-
+        
         if __name__ == "__main__":
             self.run()
 
@@ -28,7 +28,8 @@ class app_init:
 
         if os.path.exists(session_path) and authSession():
             return IndexApp()
-        return IndexApp()
+        # return IndexApp()
+        return Register()
 
     def run(self):
         self.app = QtWidgets.QApplication.instance() or QtWidgets.QApplication([])

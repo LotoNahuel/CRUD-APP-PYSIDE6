@@ -10,10 +10,10 @@ def hash_password(password: str) -> str:
             hashed_password = bcrypt.hashpw(password.encode('utf-8'), salt)
             
             # Return the hashed password as a string
-            return hashed_password.decode('utf-8'), True
+            return hashed_password.decode('utf-8')
     except Exception as e:
         print(f"Error hashing password: {e}")
-        return "", False
+        return ""
     
 def verifyPassword(passwordEncrypt, password_user: str) -> str:
     if isinstance(passwordEncrypt, str):

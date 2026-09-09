@@ -17,12 +17,50 @@ def create_user(data):
             cursor.execute('''
                 INSERT INTO user (first_name, second_name, last_name, birthdate, phone, email, password, create_at)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-            ''', (data["first_name"], data["second_name"], data["last_name"], data["birthdate"], data["phone"], data["email"], data["password"], data["create_at"]))
+            ''', (data["First Name"], data["Second Name"], data["Last Name"], data["Birth Date"], data["Phone Number"], data["Email"], data["Password"], data["Create At"]))
             connection.commit()
             return True
         except sqlite3.IntegrityError as e:
             print(f"Database error: {e}")
             return False
+        finally:
+            cursor.close()
+
+def verify_email(data):
+    with get_connection() as connection:
+        cursor = connection.cursor()
+        try:
+            cursor.execute(
+                "SELECT email FROM user WHERE email = ?",
+                    (data,)
+            )
+            email = cursor.fetchone()
+            if email is not None:
+                return True, "El email ya se encuentra registrado."
+            else:
+                return False, "Correcto"
+        except sqlite3.IntegrityError as e:
+            print(f"Database error: {e}")
+            return False, "Error al verificar los datos intente nuevamente en unos minutos."
+        finally:
+            cursor.close()
+
+def verify_phone(data):
+    with get_connection() as connection:
+        cursor = connection.cursor()
+        try:
+            cursor.execute(
+                "SELECT phone FROM user WHERE phone = ?",
+                    (data,)
+            )
+            phone = cursor.fetchone()
+            if phone is not None:
+                return True, "El Nro. de celular ya se encuentra registrado en otra cuenta."
+            else:
+                return False, "Correcto"
+        except sqlite3.IntegrityError as e:
+            print(f"Database error: {e}")
+            return False, "Error al verificar los datos intente nuevamente en unos minutos."
         finally:
             cursor.close()
 

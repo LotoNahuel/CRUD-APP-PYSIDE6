@@ -1,5 +1,10 @@
 import re
+from datetime import datetime
 from email_validator import validate_email, EmailNotValidError
+from backend.auth.encrypt.hashed import hash_password
+from backend.data.connect import create_user
+from backend.data.connect import verify_email
+from backend.data.connect import verify_phone
 
 RED_STYLE = (
     "color: white; font-size: 14px; padding: 10px; background-color: #2f2f2f; "
@@ -10,16 +15,15 @@ NORMAL_STYLE = (
     "border: 1px solid #5a5a5a; border-radius: 6px; min-width: 220px;"
 )
 
-
 def set_input_style(input_widget, is_valid):
     if input_widget is None:
         return
     input_widget.setStyleSheet(NORMAL_STYLE if is_valid else RED_STYLE)
 
-
 def verify_data(data):
     c = 0
     email = ""
+    phone_number = ""
     password = ""
     confirm_password = ""
     fields = {}
@@ -32,12 +36,14 @@ def verify_data(data):
 
             if label == "Email":
                 email = text
+            elif label == "Phone Number":
+                phone_number = text
             elif label == "Password":
                 password = text
             elif label == "Confirm Password":
                 confirm_password = text
 
-            if text == "":
+            if label != "Second Name" and text == "":
                 set_input_style(input_widget, False)
                 c += 1
             else:
@@ -47,7 +53,8 @@ def verify_data(data):
             set_input_style(fields.get("Email"), False)
             c += 1
 
-        if not password_validator(password, confirm_password):
+        boolean, hashed_password = password_validator(password, confirm_password)
+        if boolean == False:
             set_input_style(fields.get("Password"), False)
             set_input_style(fields.get("Confirm Password"), False)
             c += 1
@@ -55,10 +62,27 @@ def verify_data(data):
             set_input_style(fields.get("Password"), True)
             set_input_style(fields.get("Confirm Password"), True)
 
+        
+        if c == 0:
+            boolPhone, msjPhone = verify_phone(phone_number)
+            boolEmail, msjEmail = verify_email(email)
+            if boolPhone == True:
+                set_input_style(fields.get("Phone Number"), False)
+                return False, msjPhone
+            if boolEmail == True:
+                set_input_style(fields.get("Email"), False)
+                return False, msjEmail
+            if save_data(data, hashed_password) == True:
+                return True, "Datos guardados correctamente."
+            else:
+                return False, "Error al guardar los datos intente nuevamente."
+            
+        # return c == 0, "Datos incompletos o incorrectos. Por favor, revise los campos resaltados en rojo."
         return c == 0
     except Exception as e:
         print(f"Error al verificar los datos: {e}")
-        return False
+        return False, "Datos incompletos o incorrectos. Por favor, revise los campos resaltados en rojo."
+
 
 
 def email_review(email):
@@ -84,4 +108,27 @@ def password_validator(password, confirm_password):
         )
         return False
 
-    return True
+    hashed_password = hash_password(password)
+    if hashed_password == "":
+        return False
+    return True, hashed_password
+
+def save_data(data, hashed_password):
+    fields = {}
+    save = {}
+    for label_widget, input_widget in data:
+        label = label_widget.text()
+        fields[label] = input_widget
+        text = input_widget.text()
+
+        if label == "Confirm Password":
+            time = datetime.now()
+            save["Create At"] = time.strftime("%d/%m/%Y %H:%M:%S")
+            pass
+        elif label == "Password":
+            pass
+            save[label] = hashed_password
+        else:
+            save[label] = text
+    if create_user(save) == True:
+        return True
