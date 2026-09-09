@@ -57,7 +57,8 @@ def verify_data(data):
         if boolean == False:
             set_input_style(fields.get("Password"), False)
             set_input_style(fields.get("Confirm Password"), False)
-            c += 1
+            # c += 1
+            return False, hashed_password
         else:
             set_input_style(fields.get("Password"), True)
             set_input_style(fields.get("Confirm Password"), True)
@@ -97,8 +98,8 @@ def email_review(email):
 
 def password_validator(password, confirm_password):
     if password != confirm_password:
-        print("Las contraseñas son diferentes. Intente nuevamente.")
-        return False
+        # print("Las contraseñas son diferentes. Intente nuevamente.")
+        return False, "Las contraseñas son diferentes. Intente nuevamente."
 
     reg = r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$#%])[A-Za-z\d@$#%]{8,20}$"
     if not re.search(reg, password):
@@ -106,11 +107,11 @@ def password_validator(password, confirm_password):
             "La contraseña debe tener minimo 8 caracteres, un signo, una minuscula y/o una mayuscula "
             "y/o un numero: Ejemplo: fsaT15-685"
         )
-        return False
+        return False, "La contraseña debe tener minimo 8 caracteres:\nun signo, una minuscula y/o una mayuscula y/o un numero: Ejemplo: fsaT15-685"
 
     hashed_password = hash_password(password)
     if hashed_password == "":
-        return False
+        return False, "Error Terrible"
     return True, hashed_password
 
 def save_data(data, hashed_password):
