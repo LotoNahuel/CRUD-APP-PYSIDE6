@@ -54,7 +54,7 @@ def verify_data(data):
             c += 1
 
         boolean, hashed_password = password_validator(password, confirm_password)
-        if boolean == False:
+        if boolean:
             set_input_style(fields.get("Password"), False)
             set_input_style(fields.get("Confirm Password"), False)
             # c += 1
@@ -67,10 +67,10 @@ def verify_data(data):
         if c == 0:
             boolPhone, msjPhone = verify_phone(phone_number)
             boolEmail, msjEmail = verify_email(email)
-            if boolPhone == True:
+            if boolPhone:
                 set_input_style(fields.get("Phone Number"), False)
                 return False, msjPhone
-            if boolEmail == True:
+            if boolEmail:
                 set_input_style(fields.get("Email"), False)
                 return False, msjEmail
             if save_data(data, hashed_password) == True:
@@ -131,5 +131,5 @@ def save_data(data, hashed_password):
             save[label] = hashed_password
         else:
             save[label] = text
-    if create_user(save) == True:
+    if create_user(save):
         return True

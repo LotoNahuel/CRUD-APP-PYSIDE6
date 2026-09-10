@@ -1,4 +1,5 @@
 from PySide6 import QtCore, QtWidgets
+from PySide6.QtWidgets import QMessageBox
 from .func import verify_data
 from ...index import IndexApp
 
@@ -133,11 +134,12 @@ class Login(QtWidgets.QWidget):
 
     @QtCore.Slot()
     def magic(self):
-        if verify_data(self.entries):
+        boolean, message = verify_data(self.entries)
+        if boolean == True:
             self.message.setText("")
             self.redirect_to_index()
         else:
-            self.message.setText("Complete todos los campos!")
+            QMessageBox.information(self, "Information", message)
 
     def redirect_to_index(self):
         self._clear_layout(self.layout_primary)

@@ -21,7 +21,9 @@ def verifyPassword(passwordEncrypt, password_user: str) -> str:
 
     if bcrypt.checkpw(password_user.encode(), passwordEncrypt):
         # save_login(user_id)
-        pass
+        return True
+    else:
+        False
 
 
 if __name__ == "__main__":

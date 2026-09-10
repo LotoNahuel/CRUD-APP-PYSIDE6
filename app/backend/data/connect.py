@@ -1,13 +1,69 @@
 import sqlite3
+import os
 
 def get_connection():
     try:
         connection = sqlite3.connect("../db/database.db")
         connection.execute("PRAGMA foreign_keys = ON")
-        if connection:
-            return connection
+        return connection
     except Exception as e:
         print(f"Error al conectar con la base de datos.\nERROR: {e}")
+
+### IF NOT DB ###
+def create_tables():
+    with get_connection() as connection:
+        cursor = connection.cursor()
+        try:
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS user (
+                    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+                    first_name TEXT NOT NULL,
+                    second_name TEXT,
+                    last_name TEXT NOT NULL,
+                    birthdate TEXT NOT NULL,
+                    phone NUMERIC NOT NULL UNIQUE,
+                    email TEXT NOT NULL UNIQUE,
+                    password TEXT NOT NULL,
+                    created_at TEXT NOT NULL
+                )
+                CREATE TABLE IF NOT EXISTS teacher (
+                    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+                    firts_name TEXT NOT NULL,
+                    secon_name TEXT,
+                    last_name TEXT NOT NULL,
+                    birthdate TEXT NOT NULL,
+                    phone NUMERIC NOT NULL,
+                    email TEXT NOT NULL,
+                    create_at TEXT NOT NULL
+                )
+                CREATE TABLE IF NOT EXISTS student_subjects (
+                    userId INTEGER NOT NULL,
+                    subjectId INTEGER NOT NULL,
+
+                    PRIMARY KEY (userId, subjectId),
+
+                    FOREIGN KEY (userId) REFERENCES user(id),
+                    FOREIGN KEY (subjectId) REFERENCES subject(id)
+                )
+                CREATE TABLE IF NOT EXISTS session (
+                    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+                    userId INTEGER NOT NULL,
+                    token TEXT NOT NULL UNIQUE,
+                    device_info TEXT NOT NULL UNIQUE,
+                    ip TEXT NOT NULL UNIQUE,
+                    createAt TEXT NOT NULL,
+                    expiredAt TEXT NOT NULL,
+                )
+            """)
+            connection.commit()
+            return True
+        except sqlite3.IntegrityError as e:
+            print(f"Database error: {e}")
+            return False
+        finally:
+            cursor.close()
+
+create_tables()
 
 ### COMMIT USER ###
 def create_user(data):
@@ -18,6 +74,22 @@ def create_user(data):
                 INSERT INTO user (first_name, second_name, last_name, birthdate, phone, email, password, create_at)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             ''', (data["First Name"], data["Second Name"], data["Last Name"], data["Birth Date"], data["Phone Number"], data["Email"], data["Password"], data["Create At"]))
+            connection.commit()
+            return True
+        except sqlite3.IntegrityError as e:
+            print(f"Database error: {e}")
+            return False
+        finally:
+            cursor.close()
+
+def create_student(data):
+    with get_connection() as connection:
+        cursor = connection.cursor()
+        try:
+            cursor.execute('''
+                INSERT INTO student (id, create_at)
+                VALUES (?, ?)
+            ''', (data["id"], data["Create At"]))
             connection.commit()
             return True
         except sqlite3.IntegrityError as e:
@@ -198,11 +270,11 @@ def user_login(data):
         cursor = connection.cursor()
         try:
             cursor.execute(
-                "SELECT password, userId FROM users WHERE email = ?",
-                    (data["email"])
+                "SELECT password, id FROM user WHERE email = ?",
+                    (data,)
             )
             userData = cursor.fetchone()
-            return userData, True
+            return True, userData
         except sqlite3.IntegrityError as e:
             print(f"Database error: {e}")
             return False

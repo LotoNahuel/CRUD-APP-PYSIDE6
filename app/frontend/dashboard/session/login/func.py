@@ -1,3 +1,6 @@
+from backend.data.connect import user_login
+from backend.auth.encrypt.hashed import verifyPassword
+
 RED_STYLE = (
     "color: white; font-size: 14px; padding: 10px; background-color: #2f2f2f; "
     "border: 1px solid red; border-radius: 6px; min-width: 220px;"
@@ -35,7 +38,24 @@ def verify_data(data):
                 c += 1
             else:
                 set_input_style(input_widget, True)
-        return c == 0
+
+
+        if c == 0:
+            boolDb, dataDb = user_login(email)
+            if not boolDb or not dataDb:
+                set_input_style(fields.get("Email"), False)
+                set_input_style(fields.get("Password"), False)
+                return False, "Email and/or Password is incorrect.\nTry again!"
+            if verifyPassword(dataDb[0], password):
+                set_input_style(fields.get("Email"), True)
+                set_input_style(fields.get("Password"), True)
+                return True, "Verificado correctamente"
+            else:
+                set_input_style(fields.get("Email"), False)
+                set_input_style(fields.get("Password"), False)
+                return False, "Email and/or Password is incorrect.\nTry again!"
+
+        return c == 0, "Datos incompletos o incorrectos. Por favor, revise los campos resaltados en rojo."
     except Exception as e:
         print(f"Error al verificar los datos: {e}")
-        return False
+        return False, "Datos incompletos o incorrectos. Por favor, revise los campos resaltados en rojo."
