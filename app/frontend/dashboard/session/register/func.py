@@ -89,8 +89,8 @@ def verify_data(data):
 def email_review(email):
     email = email.strip()
     try:
-        validate_email(email)
-        return True
+        if validate_email(email):
+            
     except EmailNotValidError as e:
         print("Correo invalido:", str(e))
         return False

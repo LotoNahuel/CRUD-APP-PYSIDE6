@@ -14,7 +14,7 @@ def create_tables():
     with get_connection() as connection:
         cursor = connection.cursor()
         try:
-            cursor.execute("""
+            cursor.executescript("""
                 CREATE TABLE IF NOT EXISTS user (
                     id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
                     first_name TEXT NOT NULL,
@@ -25,7 +25,7 @@ def create_tables():
                     email TEXT NOT NULL UNIQUE,
                     password TEXT NOT NULL,
                     created_at TEXT NOT NULL
-                )
+                );
                 CREATE TABLE IF NOT EXISTS teacher (
                     id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
                     firts_name TEXT NOT NULL,
@@ -35,16 +35,17 @@ def create_tables():
                     phone NUMERIC NOT NULL,
                     email TEXT NOT NULL,
                     create_at TEXT NOT NULL
-                )
+                );
                 CREATE TABLE IF NOT EXISTS student_subjects (
                     userId INTEGER NOT NULL,
                     subjectId INTEGER NOT NULL,
+
 
                     PRIMARY KEY (userId, subjectId),
 
                     FOREIGN KEY (userId) REFERENCES user(id),
                     FOREIGN KEY (subjectId) REFERENCES subject(id)
-                )
+                );
                 CREATE TABLE IF NOT EXISTS session (
                     id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
                     userId INTEGER NOT NULL,
@@ -52,8 +53,8 @@ def create_tables():
                     device_info TEXT NOT NULL UNIQUE,
                     ip TEXT NOT NULL UNIQUE,
                     createAt TEXT NOT NULL,
-                    expiredAt TEXT NOT NULL,
-                )
+                    expiredAt TEXT NOT NULL
+                );
             """)
             connection.commit()
             return True
