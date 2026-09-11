@@ -158,4 +158,3 @@ class Register(QtWidgets.QWidget):
                 widget.deleteLater()
             elif child_layout is not None:
                 self._clear_layout(child_layout)
-    

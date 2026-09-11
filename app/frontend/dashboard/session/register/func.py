@@ -5,6 +5,7 @@ from backend.auth.encrypt.hashed import hash_password
 from backend.data.connect import create_user
 from backend.data.connect import verify_email
 from backend.data.connect import verify_phone
+from backend.auth.encrypt.token import email_token
 
 RED_STYLE = (
     "color: white; font-size: 14px; padding: 10px; background-color: #2f2f2f; "
@@ -88,9 +89,18 @@ def verify_data(data):
 
 def email_review(email):
     email = email.strip()
+    token_hashed = ""
+    expire_at = ""
     try:
         if validate_email(email):
-            
+            data = email_token()
+            token_hashed = data["token_hasehd"]
+            expire_at = data["expire_at"]
+
+            if send_email(data):
+                
+                return True
+
     except EmailNotValidError as e:
         print("Correo invalido:", str(e))
         return False

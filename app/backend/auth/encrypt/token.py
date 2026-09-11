@@ -4,6 +4,7 @@ import secrets
 import json
 import hashlib
 import socket
+from datetime import datetime, timedelta
 
 def session_token():
     try:
@@ -22,7 +23,12 @@ def session_token():
 
 def email_token():
     token = secrets.token_hex(4)
-    return token
+    token_hashed = hashlib.sha256(token.encode()).hexdigest()
+
+    create_at = datetime.now()
+    expire_at = create_at + timedelta(minutes=5)
+    data = {"token" : token, "token_hashed" : token_hashed, "create_at" : create_at, "expire_at" : expire_at}
+    return data
 
 if __name__ == "__main__":
     session_token()
