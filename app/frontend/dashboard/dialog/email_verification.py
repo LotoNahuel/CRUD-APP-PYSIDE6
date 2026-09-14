@@ -1,4 +1,4 @@
-from PySide6 import QtWidgets
+from PySide6 import QtCore, QtWidgets
 from PySide6.QtWidgets import QDialog
 
 class verification(QDialog):
@@ -30,4 +30,9 @@ class verification(QDialog):
         self.layout_primary.addLayout(self.box_text)
         self.layout_primary.addLayout(self.box_input)
 
-        
+        self.send.clicked.connect(self.magic())
+
+
+    @QtCore.Slot()
+    def magic(self, input):
+        return True

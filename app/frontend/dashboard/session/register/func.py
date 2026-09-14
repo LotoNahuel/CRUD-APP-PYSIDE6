@@ -1,9 +1,11 @@
+import os
 import re
 from datetime import datetime
 from email_validator import validate_email, EmailNotValidError
 from backend.auth.encrypt.hashed import hash_password
 from backend.data.connect import create_user
 from backend.data.connect import verify_email
+from backend.data.connect import createValidate_email
 from backend.data.connect import verify_phone
 from backend.auth.encrypt.token import email_token
 
@@ -75,7 +77,10 @@ def verify_data(data):
                 set_input_style(fields.get("Email"), False)
                 return False, msjEmail
             if save_data(data, hashed_password) == True:
-                return True, "Datos guardados correctamente."
+                data_token = email_token(email)
+                send_data = {"email" : email} | data_token
+                createValidate_email(send_data)
+                return True, email
             else:
                 return False, "Error al guardar los datos intente nuevamente."
             
@@ -88,18 +93,10 @@ def verify_data(data):
 
 
 def email_review(email):
-    email = email.strip()
-    token_hashed = ""
-    expire_at = ""
+    email_verify = email.strip()
     try:
-        if validate_email(email):
-            data = email_token()
-            token_hashed = data["token_hasehd"]
-            expire_at = data["expire_at"]
-
-            if send_email(data):
-                
-                return True
+        if validate_email(email_verify):
+            return True
 
     except EmailNotValidError as e:
         print("Correo invalido:", str(e))

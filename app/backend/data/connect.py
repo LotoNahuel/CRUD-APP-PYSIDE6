@@ -39,7 +39,7 @@ def create_tables():
                 CREATE TABLE IF NOT EXISTS student_subjects (
                     userId INTEGER NOT NULL,
                     subjectId INTEGER NOT NULL,
-
+                    create_at TEXT NOT NULL,
 
                     PRIMARY KEY (userId, subjectId),
 
@@ -52,8 +52,15 @@ def create_tables():
                     token TEXT NOT NULL UNIQUE,
                     device_info TEXT NOT NULL UNIQUE,
                     ip TEXT NOT NULL UNIQUE,
-                    createAt TEXT NOT NULL,
-                    expiredAt TEXT NOT NULL
+                    create_at TEXT NOT NULL,
+                    expired_at TEXT NOT NULL
+                );
+                CREATE TABLE IF NOT EXISTS email_validation (
+                    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+                    email TEXT NOT NULL UNIQUE,
+                    token TEXT NOT NULL UNIQUE,
+                    create_at TEXT NOT NULL,
+                    expired_at TEXT NOT NULL
                 );
             """)
             connection.commit()
@@ -115,6 +122,38 @@ def verify_email(data):
         except sqlite3.IntegrityError as e:
             print(f"Database error: {e}")
             return False, "Error al verificar los datos intente nuevamente en unos minutos."
+        finally:
+            cursor.close()
+
+def createValidate_email(data):
+    with get_connection() as connection:
+        cursor = connection.cursor()
+        try:
+            cursor.execute('''
+                INSERT INTO email_validation (email, token, create_at, expired_at)
+                VALUES (?, ?, ?, ?)
+            ''', (data["email"], data["token"], data["create_at"], data["expired_at"]))
+            connection.commit()
+            return True, "Datos subidos correctamente."
+        except sqlite3.IntegrityError as e:
+            print(f"Database error: {e}")
+            return False, "Error al subir los datos de la validacion del email."
+        finally:
+            cursor.close()
+
+def get_validate_email(data):
+    with get_connection() as connection:
+        cursor = connection.cursor()
+        try:
+            cursor.execute(
+                "SELECT * FROM email_validation WHERE email = ?",
+                    (data,)
+            )
+            get_data = cursor.fetchone()
+            return get_data, True
+        except sqlite3.IntegrityError as e:
+            print(f"Error al recuperar los datos de validacion de email: {e}")
+            return False, "Error al obtener los datos."
         finally:
             cursor.close()
 

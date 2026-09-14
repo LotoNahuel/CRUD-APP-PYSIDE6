@@ -2,6 +2,7 @@ from PySide6 import QtCore, QtWidgets, QtGui
 from PySide6.QtWidgets import QMessageBox
 from .func import verify_data
 from ..login.index import Login
+from ...dialog.email_verification import verification
 
 class Register(QtWidgets.QWidget):
     def __init__(self):
@@ -136,15 +137,17 @@ class Register(QtWidgets.QWidget):
 
     @QtCore.Slot()
     def magic(self):
-        boolean, message = verify_data(self.entries)
+        boolean, info = verify_data(self.entries)
         if boolean == True:
             #   Se envia los datos a la DB, si es correcto se redirije al LOGIN    #
             #   Como no vamos a crear la DB todavia, verificamos que los datos son correctos-
             #   y redirigimos al LOGIN  #
-            self._clear_layout(self.layout_primary)
-            return self.layout_primary.addWidget(Login(), alignment=QtCore.Qt.AlignCenter)
+            dialog = verification()
+            if dialog.exec():
+                self._clear_layout(self.layout_primary)
+                return self.layout_primary.addWidget(Login(), alignment=QtCore.Qt.AlignCenter)
         else:
-            QMessageBox.information(self, "Información", message)
+            QMessageBox.information(self, "Información", info)
             self.message.setText("Complete todos los campos")
 
     def _clear_layout(self, layout):
