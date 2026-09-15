@@ -1,13 +1,15 @@
 import os
+import json
 import re
 from datetime import datetime
 from email_validator import validate_email, EmailNotValidError
 from backend.auth.encrypt.hashed import hash_password
-from backend.data.connect import create_user
-from backend.data.connect import verify_email
-from backend.data.connect import createValidate_email
-from backend.data.connect import verify_phone
+from backend.data.connect import create_user, verify_email, createValidate_email, verify_phone
+# from backend.data.connect import verify_email
+# from backend.data.connect import createValidate_email
+# from backend.data.connect import verify_phone
 from backend.auth.encrypt.token import email_token
+from ...dialog.email_verification import verification
 
 RED_STYLE = (
     "color: white; font-size: 14px; padding: 10px; background-color: #2f2f2f; "
@@ -30,6 +32,7 @@ def verify_data(data):
     password = ""
     confirm_password = ""
     fields = {}
+    save = {}
 
     try:
         for label_widget, input_widget in data:
@@ -57,7 +60,7 @@ def verify_data(data):
             c += 1
 
         boolean, hashed_password = password_validator(password, confirm_password)
-        if boolean:
+        if boolean is False:
             set_input_style(fields.get("Password"), False)
             set_input_style(fields.get("Confirm Password"), False)
             # c += 1
@@ -76,13 +79,15 @@ def verify_data(data):
             if boolEmail:
                 set_input_style(fields.get("Email"), False)
                 return False, msjEmail
-            if save_data(data, hashed_password) == True:
-                data_token = email_token(email)
-                send_data = {"email" : email} | data_token
-                createValidate_email(send_data)
-                return True, email
+            boolToken, msjToken = validateTokenMail(email)
+            if boolToken:
+                return True, hashed_password
             else:
-                return False, "Error al guardar los datos intente nuevamente."
+                return False, msjToken
+            # if save_data(data, hashed_password) == True:
+            #                     return True, "Correcto"
+            # else:
+            #     return False, "Error al guardar los datos intente nuevamente."
             
         # return c == 0, "Datos incompletos o incorrectos. Por favor, revise los campos resaltados en rojo."
         return c == 0
@@ -121,22 +126,44 @@ def password_validator(password, confirm_password):
         return False, "Error Terrible"
     return True, hashed_password
 
-def save_data(data, hashed_password):
-    fields = {}
-    save = {}
-    for label_widget, input_widget in data:
-        label = label_widget.text()
-        fields[label] = input_widget
-        text = input_widget.text()
+def validateTokenMail(email):
+    data_token = email_token()
+    send_data = {"email" : email} | data_token
 
-        if label == "Confirm Password":
-            time = datetime.now()
-            save["Create At"] = time.strftime("%d/%m/%Y %H:%M:%S")
-            pass
-        elif label == "Password":
-            pass
-            save[label] = hashed_password
-        else:
-            save[label] = text
-    if create_user(save):
-        return True
+    ruta = os.path.abspath(os.path.join(
+        os.path.dirname(__file__),
+        "..", "..", "..", "..",
+        "backend", "auth", "encrypt", "verify_email.json",
+    ))
+    with open(ruta, "w") as f:
+        json.dump({"email" : email}, f)
+
+    # dialog = verification()
+    if createValidate_email(send_data):
+        return True, "Se ha enviado un correo de verificacion a su correo electronico, por favor ingrese el codigo para verificar su correo."
+    else:
+        return False, "Error al guardar el token de verificacion en la base de datos. Intente nuevamente."
+        # if dialog:
+        #     return True, "Correcto"
+        # else:
+        #     return False
+
+# def save_data(data, hashed_password):
+#     fields = {}
+#     save = {}
+#     for label_widget, input_widget in data:
+#         label = label_widget.text()
+#         fields[label] = input_widget
+#         text = input_widget.text()
+
+#         if label == "Confirm Password":
+#             time = datetime.now()
+#             save["Create At"] = time.strftime("%d/%m/%Y %H:%M:%S")
+#             pass
+#         elif label == "Password":
+#             pass
+#             save[label] = hashed_password
+#         else:
+#             save[label] = text
+#     if create_user(save):
+#         return True

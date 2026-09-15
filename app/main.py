@@ -5,6 +5,7 @@ from backend.auth.encrypt.session import authSession
 from frontend.dashboard.session.login.index import Login
 from frontend.dashboard.index import IndexApp
 from frontend.dashboard.session.register.index import Register
+from frontend.dashboard.dialog.email_verification import verification
 
 ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if ROOT_DIR not in sys.path:
@@ -29,7 +30,8 @@ class app_init:
         if os.path.exists(session_path) and authSession():
             return IndexApp()
         # return IndexApp()
-        return Register()
+        # return Register()
+        return verification()
 
     def run(self):
         self.app = QtWidgets.QApplication.instance() or QtWidgets.QApplication([])

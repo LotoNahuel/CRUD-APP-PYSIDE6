@@ -1,3 +1,4 @@
+import os
 from backend.data.connect import get_validate_email
 
 def validate_data(data):

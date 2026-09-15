@@ -22,11 +22,12 @@ def session_token():
         return False
 
 def email_token():
-    token = secrets.token_hex(4)
+    token = secrets.token_hex(3)
     token_hashed = hashlib.sha256(token.encode()).hexdigest()
 
     create_at = datetime.now()
     expire_at = create_at + timedelta(minutes=5)
+
     data = {"token" : token, "token_hashed" : token_hashed, "create_at" : create_at, "expire_at" : expire_at}
     return data
 

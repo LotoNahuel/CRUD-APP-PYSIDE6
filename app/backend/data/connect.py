@@ -24,7 +24,7 @@ def create_tables():
                     phone NUMERIC NOT NULL UNIQUE,
                     email TEXT NOT NULL UNIQUE,
                     password TEXT NOT NULL,
-                    created_at TEXT NOT NULL
+                    create_at TEXT NOT NULL
                 );
                 CREATE TABLE IF NOT EXISTS teacher (
                     id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
@@ -132,7 +132,7 @@ def createValidate_email(data):
             cursor.execute('''
                 INSERT INTO email_validation (email, token, create_at, expired_at)
                 VALUES (?, ?, ?, ?)
-            ''', (data["email"], data["token"], data["create_at"], data["expired_at"]))
+            ''', (data["email"], data["token"], data["create_at"], data["expire_at"]))
             connection.commit()
             return True, "Datos subidos correctamente."
         except sqlite3.IntegrityError as e:

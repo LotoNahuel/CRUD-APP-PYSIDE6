@@ -1,8 +1,10 @@
 from PySide6 import QtCore, QtWidgets, QtGui
-from PySide6.QtWidgets import QMessageBox
+from PySide6.QtWidgets import QMessageBox, QDialog
 from .func import verify_data
 from ..login.index import Login
 from ...dialog.email_verification import verification
+from datetime import datetime
+from backend.data.connect import create_user
 
 class Register(QtWidgets.QWidget):
     def __init__(self):
@@ -137,17 +139,31 @@ class Register(QtWidgets.QWidget):
 
     @QtCore.Slot()
     def magic(self):
-        boolean, info = verify_data(self.entries)
+        boolean, data = verify_data(self.entries)
         if boolean == True:
-            #   Se envia los datos a la DB, si es correcto se redirije al LOGIN    #
-            #   Como no vamos a crear la DB todavia, verificamos que los datos son correctos-
-            #   y redirigimos al LOGIN  #
             dialog = verification()
-            if dialog.exec():
-                self._clear_layout(self.layout_primary)
-                return self.layout_primary.addWidget(Login(), alignment=QtCore.Qt.AlignCenter)
+            if dialog.exec() == QDialog.DialogCode.Accepted:
+                save = {}
+                for label_widget, input_widget in data:
+                    label = label_widget.text()
+                    text = input_widget.text()
+
+                    if label == "Confirm Password":
+                        time = datetime.now()
+                        save["Create At"] = time.strftime("%d/%m/%Y %H:%M:%S")
+                        pass
+                    elif label == "Password":
+                        pass
+                        save[label] = data
+                    else:
+                        save[label] = text
+                if create_user(save):
+                    self.message.setText("Usuario creado correctamente")
+                    self.message.setStyleSheet("color: #00FF00; font-size: 14px; background-color: #2a2b2b;")
+                    self._clear_layout(self.layout_primary)
+                    return self.layout_primary.addWidget(Login(), alignment=QtCore.Qt.AlignCenter)
         else:
-            QMessageBox.information(self, "Información", info)
+            QMessageBox.information(self, "Información", data)
             self.message.setText("Complete todos los campos")
 
     def _clear_layout(self, layout):
