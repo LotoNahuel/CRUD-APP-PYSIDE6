@@ -147,10 +147,10 @@ def get_validate_email(data):
         try:
             cursor.execute(
                 "SELECT * FROM email_validation WHERE email = ?",
-                    (data,)
+                    (data["email"],)
             )
             get_data = cursor.fetchone()
-            return get_data, True
+            return True, get_data
         except sqlite3.IntegrityError as e:
             print(f"Error al recuperar los datos de validacion de email: {e}")
             return False, "Error al obtener los datos."

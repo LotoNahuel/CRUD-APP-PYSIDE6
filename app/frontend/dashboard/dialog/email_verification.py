@@ -1,5 +1,9 @@
+import os
+import json
+import hashlib
 from PySide6 import QtCore, QtWidgets
 from PySide6.QtWidgets import QDialog
+from backend.data.connect import get_validate_email
 
 class verification(QDialog):
     def __init__(self, parent=None):
@@ -34,13 +38,14 @@ class verification(QDialog):
             self.input_code.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
             self.inputs.append(self.input_code)
             self.box_input.addWidget(self.input_code)
-            # salto(self.input_code)
-            if len(self.input_code.text()) >= 1:
-                self.input_code.setFocus()
 
-        # def salto(input_code):
-        #     if len(self.inputs.text()) >= 1:
-        #         self.inputs.setFocus()
+        for j in range(len(self.inputs) - 1):
+            actual = self.inputs[j]
+            nextt = self.inputs[j + 1]
+            
+            actual.textChanged.connect(
+                lambda _, c_act=actual, c_sig=nextt: self.salto(c_act, c_sig)
+            )
 
         self.send = QtWidgets.QDialogButtonBox(QtWidgets.QDialogButtonBox.Ok | QtWidgets.QDialogButtonBox.Cancel)
 
@@ -61,8 +66,21 @@ class verification(QDialog):
     def magic(self):
         print("Se presiono el boton de enviar")
         code = "".join(input.text() for input in self.inputs)
-        print(code)
-        # if input == input:
-        # return True
-        # else:
-            # return False
+        if os.path.exists():
+            with open("", "r") as f:
+                data = json.load(f)
+            boolean, get_data = get_validate_email(data)
+            if boolean:
+                if get_data["token"] == hashlib.sha256(code.encode()).hexdigest():
+                    return True
+                else:
+                    return False
+            else:
+                return False
+        else:
+            return False
+
+    @QtCore.Slot()
+    def salto(self, c_act, c_sig):
+        if len(c_act.text()) >= c_act.maxLength():
+            c_sig.setFocus()

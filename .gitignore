@@ -10,6 +10,10 @@ Thumbs.db
 
 .json
 
+app/api/credentials.json
+app/backend/auth/encrypt/token.json
+app/backend/auth/encrypt/verify_email.json
+
 .except
 .db
 .sqbpro
