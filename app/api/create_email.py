@@ -2,7 +2,7 @@ import os.path
 import base64
 from email.message import EmailMessage
 
-import google.auth
+# import google.auth
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
@@ -21,7 +21,13 @@ def gmail_create_draft(text, userEmail):
   TODO(developer) - See https://developers.google.com/identity
   for guides on implementing OAuth2 for the application.
   """
-  creds, _ = google.auth.default()
+
+  creds, _ = ""
+
+  if os.path.exists("credentials.json"):
+    with open("credentials.json" , "r") as r:
+      creds, _ = r
+
 
   try:
     # create gmail api client
