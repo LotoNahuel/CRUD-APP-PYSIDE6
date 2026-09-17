@@ -5,10 +5,8 @@ from datetime import datetime
 from email_validator import validate_email, EmailNotValidError
 from backend.auth.encrypt.hashed import hash_password
 from backend.data.connect import create_user, verify_email, createValidate_email, verify_phone
-# from backend.data.connect import verify_email
-# from backend.data.connect import createValidate_email
-# from backend.data.connect import verify_phone
 from backend.auth.encrypt.token import email_token
+from api.create_email import gmail_create_draft
 from ...dialog.email_verification import verification
 
 RED_STYLE = (
@@ -140,7 +138,10 @@ def validateTokenMail(email):
 
     # dialog = verification()
     if createValidate_email(send_data):
-        return True, "Se ha enviado un correo de verificacion a su correo electronico, por favor ingrese el codigo para verificar su correo."
+        draft = gmail_create_draft(data_token["token"], email)
+        if draft:
+            print(draft)
+            return True, "Se ha enviado un correo de verificacion a su correo electronico, por favor ingrese el codigo para verificar su correo."
     else:
         return False, "Error al guardar el token de verificacion en la base de datos. Intente nuevamente."
         # if dialog:

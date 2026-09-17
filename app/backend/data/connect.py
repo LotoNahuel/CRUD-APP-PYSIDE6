@@ -157,6 +157,22 @@ def get_validate_email(data):
         finally:
             cursor.close()
 
+def delete_validate_email():
+    with get_connection() as connection:
+        cursor = connection.cursor()
+        try:
+            cursor.execute("DELETE FROM email_validation WHERE expired_at < datetime('now')")
+            connection.commit()
+            print("DATOS BORRADOS")
+            return True
+        except sqlite3.IntegrityError as e:
+            print(f"Error al borrar las verificaciones de la base de datos: \n{e}")
+            return False
+        finally:
+            cursor.close()
+
+delete_validate_email()
+
 def verify_phone(data):
     with get_connection() as connection:
         cursor = connection.cursor()

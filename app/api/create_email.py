@@ -1,10 +1,16 @@
+import os.path
 import base64
 from email.message import EmailMessage
 
 import google.auth
+from google.auth.transport.requests import Request
+from google.oauth2.credentials import Credentials
+from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
+
+SCOPES = ["https://www.googleapis.com/auth/gmail.send"]
 
 def gmail_create_draft(text, userEmail):
   """Create and insert a draft email.
@@ -37,8 +43,10 @@ def gmail_create_draft(text, userEmail):
     # pylint: disable=E1101
     draft = (
         service.users()
-        .drafts()
-        .create(userId="me", body=create_message)
+        # .drafts()
+        .messages
+        # .create(userId="me", body=create_message)
+        .semd(userId="me", body=create_message)
         .execute()
     )
 

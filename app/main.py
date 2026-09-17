@@ -30,8 +30,8 @@ class app_init:
         if os.path.exists(session_path) and authSession():
             return IndexApp()
         # return IndexApp()
-        # return Register()
-        return verification()
+        return Register()
+        # return verification()
 
     def run(self):
         self.app = QtWidgets.QApplication.instance() or QtWidgets.QApplication([])

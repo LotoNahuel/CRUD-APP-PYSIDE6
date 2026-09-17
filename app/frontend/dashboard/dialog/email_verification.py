@@ -5,6 +5,19 @@ from PySide6 import QtCore, QtWidgets
 from PySide6.QtWidgets import QDialog
 from backend.data.connect import get_validate_email
 
+style_button = """
+        QPushButton {
+            background: #009EDE;
+            padding: 10px;
+            color: white;
+            font-size: 20px;
+            font-weight: bold;
+            width: 100px;
+        }
+        QPushButton:hover { background-color: #0075A3; }
+        QPushButton:pressed { background-color: #003347; }
+    """
+
 class verification(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -14,6 +27,7 @@ class verification(QDialog):
         self.layout_primary = QtWidgets.QVBoxLayout(self)
         self.layout_primary.setContentsMargins(10, 10, 10, 10)
         self.layout_primary.setSpacing(10)
+        self.layout_primary.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
 
         self.box_text = QtWidgets.QHBoxLayout()
         self.box_text.setContentsMargins(0, 0, 0, 0)
@@ -27,6 +41,7 @@ class verification(QDialog):
         self.box_button = QtWidgets.QHBoxLayout()
         self.box_button.setContentsMargins(0, 0, 0, 0)
         self.box_button.setSpacing(10)
+        self.box_button.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
 
         self.inputs = []
         self.text = QtWidgets.QLabel()
@@ -48,9 +63,9 @@ class verification(QDialog):
             )
 
         self.send = QtWidgets.QDialogButtonBox(QtWidgets.QDialogButtonBox.Ok | QtWidgets.QDialogButtonBox.Cancel)
+        self.send.setStyleSheet(style_button)
 
         self.text.setStyleSheet("color: white; font-size: 20px; font-weight: bold;")
-        self.send.setStyleSheet("color: white; font-size: 14px; padding: 10px; background-color: #2f2f2f; border: 1px solid #5a5a5a; border-radius: 6px; min-width: 220px;")
         self.text.setText("Se a enviado un mail al correo ********************** con un codigo.\nIngrese el codigo para verificar su mail:\n(El codigo expira en 5 minutos)")
 
         self.box_text.addWidget(self.text)
@@ -66,18 +81,21 @@ class verification(QDialog):
     def magic(self):
         print("Se presiono el boton de enviar")
         code = "".join(input.text() for input in self.inputs)
-        if os.path.exists():
-            with open("", "r") as f:
+        if os.path.exists("backend/auth/encrypt/verify_email.json"):
+            with open("backend/auth/encrypt/verify_email.json", "r") as f:
                 data = json.load(f)
+            print(data)
             boolean, get_data = get_validate_email(data)
             if boolean:
-                if get_data["token"] == hashlib.sha256(code.encode()).hexdigest():
+                print(get_data)
+                if get_data[2] == hashlib.sha256(code.encode()).hexdigest():
                     return True
                 else:
                     return False
             else:
                 return False
         else:
+            print("NOP")
             return False
 
     @QtCore.Slot()

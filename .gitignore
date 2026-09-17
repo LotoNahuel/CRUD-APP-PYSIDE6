@@ -11,6 +11,7 @@ Thumbs.db
 .json
 
 app/api/credentials.json
+app/api/token.json
 app/backend/auth/encrypt/token.json
 app/backend/auth/encrypt/verify_email.json
 
