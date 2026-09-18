@@ -132,7 +132,7 @@ def createValidate_email(data):
             cursor.execute('''
                 INSERT INTO email_validation (email, token, create_at, expired_at)
                 VALUES (?, ?, ?, ?)
-            ''', (data["email"], data["token"], data["create_at"], data["expire_at"]))
+            ''', (data["email"], data["token_hashed"], data["create_at"], data["expire_at"]))
             connection.commit()
             return True, "Datos subidos correctamente."
         except sqlite3.IntegrityError as e:
@@ -142,12 +142,13 @@ def createValidate_email(data):
             cursor.close()
 
 def get_validate_email(data):
+    print(data)
     with get_connection() as connection:
         cursor = connection.cursor()
         try:
             cursor.execute(
                 "SELECT * FROM email_validation WHERE email = ?",
-                    (data["email"],)
+                    (data,)
             )
             get_data = cursor.fetchone()
             return True, get_data
@@ -170,8 +171,6 @@ def delete_validate_email():
             return False
         finally:
             cursor.close()
-
-delete_validate_email()
 
 def verify_phone(data):
     with get_connection() as connection:

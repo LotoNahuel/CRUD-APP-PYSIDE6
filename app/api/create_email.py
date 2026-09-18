@@ -12,30 +12,36 @@ from googleapiclient.errors import HttpError
 
 SCOPES = ["https://www.googleapis.com/auth/gmail.send"]
 
+def get_gmail_service():
+
+  creds = None
+
+  if os.path.exists("token.json"):
+    creds = Credentials.from_authorized_user_file( "token.json", SCOPES )
+
+  if not creds or not creds.valid:
+
+    if creds and creds.expired and creds.refresh_token:
+      creds.refresh(Request())
+    else:
+      flow = InstalledAppFlow.from_client_secrets_file( "api/credentials.json", SCOPES )
+
+      creds = flow.run_local_server(port=0)
+
+    with open("token.json", "w") as token:
+      token.write(creds.to_json())
+
+  return build( "gmail", "v1", credentials=creds )
+
 def gmail_create_draft(text, userEmail):
-  """Create and insert a draft email.
-   Print the returned draft's message and id.
-   Returns: Draft object, including draft id and message meta data.
-
-  Load pre-authorized user credentials from the environment.
-  TODO(developer) - See https://developers.google.com/identity
-  for guides on implementing OAuth2 for the application.
-  """
-
-  creds, _ = ""
-
-  if os.path.exists("credentials.json"):
-    with open("credentials.json" , "r") as r:
-      creds, _ = r
-
 
   try:
     # create gmail api client
-    service = build("gmail", "v1", credentials=creds)
+    # service = build("gmail", "v1", credentials=creds)
+    service = get_gmail_service()
 
     message = EmailMessage()
 
-    # message.set_content("This is automated draft mail")
     message.set_content(f"THIS TOKEN EXPIRED IN 5 MINUTES: {text}\nDON'T SHARE THIS TOKEN WITH ANYONE")
 
     message["To"] = userEmail
@@ -45,25 +51,24 @@ def gmail_create_draft(text, userEmail):
     # encoded message
     encoded_message = base64.urlsafe_b64encode(message.as_bytes()).decode()
 
-    create_message = {"message": {"raw": encoded_message}}
+    create_message = {"raw": encoded_message}
     # pylint: disable=E1101
-    draft = (
+    send_message = (
         service.users()
-        # .drafts()
-        .messages
-        # .create(userId="me", body=create_message)
-        .semd(userId="me", body=create_message)
+        .messages()
+        .send(userId="me", body=create_message)
         .execute()
     )
 
-    print(f'Draft id: {draft["id"]}\nDraft message: {draft["message"]}')
+    print(f'Message: {send_message["id"]}')
+
+    return True, send_message
 
   except HttpError as error:
     print(f"An error occurred: {error}")
-    draft = None
-
-  return draft
+  return False, None
 
 
 if __name__ == "__main__":
+  get_gmail_service()
   gmail_create_draft()

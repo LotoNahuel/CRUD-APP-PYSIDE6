@@ -82,12 +82,6 @@ def verify_data(data):
                 return True, hashed_password
             else:
                 return False, msjToken
-            # if save_data(data, hashed_password) == True:
-            #                     return True, "Correcto"
-            # else:
-            #     return False, "Error al guardar los datos intente nuevamente."
-            
-        # return c == 0, "Datos incompletos o incorrectos. Por favor, revise los campos resaltados en rojo."
         return c == 0
     except Exception as e:
         print(f"Error al verificar los datos: {e}")
@@ -136,35 +130,9 @@ def validateTokenMail(email):
     with open(ruta, "w") as f:
         json.dump({"email" : email}, f)
 
-    # dialog = verification()
     if createValidate_email(send_data):
-        draft = gmail_create_draft(data_token["token"], email)
-        if draft:
-            print(draft)
+        booleano, draft = gmail_create_draft(data_token["token"], email)
+        if booleano:
             return True, "Se ha enviado un correo de verificacion a su correo electronico, por favor ingrese el codigo para verificar su correo."
     else:
         return False, "Error al guardar el token de verificacion en la base de datos. Intente nuevamente."
-        # if dialog:
-        #     return True, "Correcto"
-        # else:
-        #     return False
-
-# def save_data(data, hashed_password):
-#     fields = {}
-#     save = {}
-#     for label_widget, input_widget in data:
-#         label = label_widget.text()
-#         fields[label] = input_widget
-#         text = input_widget.text()
-
-#         if label == "Confirm Password":
-#             time = datetime.now()
-#             save["Create At"] = time.strftime("%d/%m/%Y %H:%M:%S")
-#             pass
-#         elif label == "Password":
-#             pass
-#             save[label] = hashed_password
-#         else:
-#             save[label] = text
-#     if create_user(save):
-#         return True

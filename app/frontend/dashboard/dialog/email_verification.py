@@ -1,6 +1,7 @@
 import os
 import json
 import hashlib
+import hmac
 from PySide6 import QtCore, QtWidgets
 from PySide6.QtWidgets import QDialog
 from backend.data.connect import get_validate_email
@@ -79,23 +80,27 @@ class verification(QDialog):
 
     @QtCore.Slot()
     def magic(self):
-        print("Se presiono el boton de enviar")
         code = "".join(input.text() for input in self.inputs)
         if os.path.exists("backend/auth/encrypt/verify_email.json"):
             with open("backend/auth/encrypt/verify_email.json", "r") as f:
                 data = json.load(f)
-            print(data)
-            boolean, get_data = get_validate_email(data)
+            print(f"Email : {data['email']}")
+            boolean, get_data = get_validate_email(data['email'])
             if boolean:
-                print(get_data)
-                if get_data[2] == hashlib.sha256(code.encode()).hexdigest():
-                    return True
+                print(f"DATA TOKEN DB: {get_data[2]}")
+                hash_code = hashlib.sha256(code.encode('utf-8')).hexdigest()
+                if hmac.compare_digest(hash_code, get_data[2]):
+                    print("COMPARACION, CORRECTA")
+                    self.accept()
                 else:
+                    print("No hay coincidencia")
                     return False
             else:
+                print(boolean)
+                print("No hay Booleano o es False")
                 return False
         else:
-            print("NOP")
+            print("NO EXISTE LA RUTA")
             return False
 
     @QtCore.Slot()

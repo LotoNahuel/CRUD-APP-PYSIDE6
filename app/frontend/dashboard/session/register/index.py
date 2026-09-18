@@ -140,10 +140,12 @@ class Register(QtWidgets.QWidget):
     @QtCore.Slot()
     def magic(self):
         boolean, data = verify_data(self.entries)
+        print(f"DATA A ENVIAR A LA DB: \n{data}")
         if boolean == True:
             dialog = verification()
             if dialog.exec() == QDialog.DialogCode.Accepted:
                 save = {}
+                ### EN EL FOR ESTA EL ERROR ###
                 for label_widget, input_widget in data:
                     label = label_widget.text()
                     text = input_widget.text()
