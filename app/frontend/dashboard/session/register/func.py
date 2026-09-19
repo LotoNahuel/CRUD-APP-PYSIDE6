@@ -47,6 +47,11 @@ def verify_data(data):
             elif label == "Confirm Password":
                 confirm_password = text
 
+            ###     GUARDAR DATOS PARA LA DB     ###
+            if label != "Confirm Password" or label != "Password":
+                save[label] = text
+            ###                                  ###
+
             if label != "Second Name" and text == "":
                 set_input_style(input_widget, False)
                 c += 1
@@ -79,7 +84,9 @@ def verify_data(data):
                 return False, msjEmail
             boolToken, msjToken = validateTokenMail(email)
             if boolToken:
-                return True, hashed_password
+                save["Password"] = hashed_password
+                save["Create At"] = datetime.now()
+                return True, save
             else:
                 return False, msjToken
         return c == 0

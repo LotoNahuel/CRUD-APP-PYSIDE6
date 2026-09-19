@@ -144,22 +144,7 @@ class Register(QtWidgets.QWidget):
         if boolean == True:
             dialog = verification()
             if dialog.exec() == QDialog.DialogCode.Accepted:
-                save = {}
-                ### EN EL FOR ESTA EL ERROR ###
-                for label_widget, input_widget in data:
-                    label = label_widget.text()
-                    text = input_widget.text()
-
-                    if label == "Confirm Password":
-                        time = datetime.now()
-                        save["Create At"] = time.strftime("%d/%m/%Y %H:%M:%S")
-                        pass
-                    elif label == "Password":
-                        pass
-                        save[label] = data
-                    else:
-                        save[label] = text
-                if create_user(save):
+                if create_user(data):
                     self.message.setText("Usuario creado correctamente")
                     self.message.setStyleSheet("color: #00FF00; font-size: 14px; background-color: #2a2b2b;")
                     self._clear_layout(self.layout_primary)
@@ -179,3 +164,7 @@ class Register(QtWidgets.QWidget):
                 widget.deleteLater()
             elif child_layout is not None:
                 self._clear_layout(child_layout)
+
+
+# CONTRASEÑA
+# Acamdndasvos$88
